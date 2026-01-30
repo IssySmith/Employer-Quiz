@@ -1,0 +1,57 @@
+[
+  {
+    "question": "Which is the strongest indicator of a phishing email?",
+    "options": ["Urgent action required with a link", "Contains a company logo", "Came from a known brand"],
+    "answer": 0
+  },
+  {
+    "question": "What should you always do before leaving your desk?",
+    "options": ["Disconnect Wi-Fi", "Lock your device", "Close all apps"],
+    "answer": 1
+  },
+  {
+    "question": "Which password is the strongest?",
+    "options": ["Password123", "London2024", "!R9$kL@82_p"],
+    "answer": 2
+  },
+  {
+    "question": "What should you do if you suspect your IBM credentials are compromised?",
+    "options": ["Ignore it", "Tell a friend", "Report it and reset immediately"],
+    "answer": 2
+  },
+  {
+    "question": "Which location is safest for storing IBM confidential documents?",
+    "options": ["Personal email", "USB stick", "IBM-approved secure cloud storage"],
+    "answer": 2
+  },
+  {
+    "question": "What is your safest response to a suspicious Slack message?",
+    "options": ["Send the requested file", "Verify the person through another channel", "Ignore it"],
+    "answer": 1
+  },
+  {
+    "question": "Why are security updates important?",
+    "options": ["Fix vulnerabilities", "Increase battery life", "Change system theme"],
+    "answer": 0
+  },
+  {
+    "question": "Which is a sign of social engineering?",
+    "options": ["A colleague asks a technical question", "Someone pressures you for quick access", "You receive a meeting invite"],
+    "answer": 1
+  },
+  {
+    "question": "When is it safe to use public Wi‑Fi for IBM work?",
+    "options": ["Always", "Only when using IBM VPN", "Never"],
+    "answer": 1
+  },
+  {
+    "question": "What should you do after clicking a suspicious link?",
+    "options": ["Delete the email", "Report it immediately to security", "Pretend nothing happened"],
+    "answer": 1
+  },
+  {
+    "question": "Which action best protects sensitive client data?",
+    "options": ["Share it with any team member", "Store it indefinitely", "Share only with authorised individuals and systems"],
+    "answer": 2
+  }
+]
