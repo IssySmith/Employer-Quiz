@@ -11,6 +11,7 @@ def load_questions(path: str) -> Dict[int, Any]:
     try:
         with open(path, "r", encoding="utf-8") as file:
             data = json.load(file)
+            print("Worked")
         return {i: q for i, q in enumerate(data)}
     
     except FileNotFoundError:
