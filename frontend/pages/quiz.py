@@ -1,7 +1,7 @@
 import streamlit as st
-from widgets import hide_toolbar
-from backend.question_loader import load_questions 
+from pages.widgets import hide_toolbar
 
-hide_toolbar
+hide_toolbar()
 
 st.title("This is the quiz")
+
