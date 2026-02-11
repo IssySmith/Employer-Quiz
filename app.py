@@ -1,5 +1,8 @@
 import streamlit as st
 from pages.widgets import hide_toolbar
+from backend.question_loader import load_questions
+from backend.quiz_engine import Quiz
+from backend.scoring import Scoring
 
 hide_toolbar()
 
