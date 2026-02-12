@@ -1,4 +1,4 @@
-from ..backend.question_loader import load_questions
+from backend.question_loader import load_questions
 from pathlib import Path
 
 def test_load_questions_true():
