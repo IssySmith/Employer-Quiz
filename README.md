@@ -46,6 +46,9 @@ To Design what my interface would look like, I created a Figma prottype with the
 >
 
 ## Tech Stack Outline
+My backend code is using **Python**, this is what I have been using this module and I am comfortable coding with it but also want to experience importing the classes or functipns as it is somehting I would use in work.
+
+To create my GUI, I decided to use **Streamlit**. At first I was going to use Tkinter as I have some previous use of coding with it. However, what changed my mind was after speaking with people I work with they recommend I use Streamlit as it is something they have sometimes used in work and would be useful to understand.
 
 ## Code Design
 
