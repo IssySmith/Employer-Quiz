@@ -1,4 +1,4 @@
-from backend.question_loader import load_questions
+from ..backend.question_loader import load_questions
 
 def test_load_questions_true():
     assert load_questions("questions.json") == True

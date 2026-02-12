@@ -1,5 +1,5 @@
-from question_loader import load_questions
-from scoring import Scoring
+from .question_loader import load_questions
+from .scoring import Scoring
 
 """
 This class does .....
