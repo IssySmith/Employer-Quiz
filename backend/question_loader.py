@@ -1,6 +1,3 @@
-import json
-from typing import Dict, Any
-
 """
 This function loads questions from a JSON file and return them indexed by position.
 If the file is empty or had whitespace only it is invalid.
@@ -8,6 +5,9 @@ Only lists and dictionaries in the file is allowed.
 If the file cannot be found an exception is placed to show the user the error.
 If the file is found but has invalid JSON, then such error is also displayed.
 """
+
+import json
+from typing import Dict, Any
 
 def load_questions(path: str) -> Dict[int, Any]:
     try:

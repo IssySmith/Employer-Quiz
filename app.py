@@ -1,7 +1,11 @@
+"""
+This is the first page in streamlit so is put into the root.
+It requires the user to enter their name before continuing with the quiz
+"""
+
 import streamlit as st
 from pages.widgets import hide_toolbar
 from backend.question_loader import load_questions
-
 
 hide_toolbar()
 
@@ -11,6 +15,7 @@ user_name = st.text_input("Your name: ")
 
 if user_name:
     st.write(f"Hello {user_name}, please press start when you are ready...")
+    st.session_state['username'] = user_name
 
 switch_page = st.button("Start")
 if switch_page and user_name:

@@ -1,9 +1,10 @@
-from .question_loader import load_questions
-from .scoring import Scoring
 
 """
 This class does .....
 """
+
+from .question_loader import load_questions
+from .scoring import Scoring
 
 class Quiz:
     def __init__(self):
@@ -43,29 +44,3 @@ class Quiz:
     def final_score(self) -> tuple[int, int]:
         return self.score.get_score(), len(self.questions)
 
-
-if __name__ == "__main__":
-    session = Quiz()
-
-    while session.another_question():
-        q, opts, num, total = session.current_question()
-        print("")
-        print(f"Q{num}/{total}: {q}")
-        i = 0 
-        
-        for option in opts:
-            i+=1
-            print(f"{str(i)}. {option}")
-
-        answer = int(input("Your answer: ")) - 1
-        correct = session.submit_answer(answer)
-
-        if correct:
-            print("Correct!")
-            
-        else:
-            print("Wrong!")
-            print("The correct answer is:", session.correct_answer())
-
-    score, total = session.final_score()
-    print(f"This is the end, your score is: {score}/{total}")
