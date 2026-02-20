@@ -34,13 +34,13 @@ class Quiz:
         self.index += 1
         return correct
 
-    def correct_answer(self) -> str:
+    def correct_answer(self):
         previous = self.index - 1
         if previous < 0:
             return ""
         question = self.questions[previous]
         return question["options"][question["answer"]]
 
-    def final_score(self) -> tuple[int, int]:
+    def final_score(self):
         return self.score.get_score(), len(self.questions)
 

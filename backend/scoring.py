@@ -10,7 +10,7 @@ class Scoring:
     def get_score(self):
         return self.score
     
-    def addpoint(self) -> int:
+    def add_point(self) -> int:
         self.score +=1 
         return self.score
     
