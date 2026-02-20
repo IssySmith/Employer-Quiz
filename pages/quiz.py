@@ -59,7 +59,7 @@ if st.session_state.next_question:
             st.rerun()
 else:
     question, options, number, total = quiz.current_question()
-    st.markdown(f"Q{number}/{total}: {question}")
+    st.markdown(f"Q{number}: {question}")
 
     answer = st.radio("Choose an answer", options)
     submit = st.button("Submit")

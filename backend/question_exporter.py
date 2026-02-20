@@ -3,7 +3,10 @@ from pathlib import Path
 
 def export_to_csv(username: str, score: int, total: int, filepath: str = "quiz_results.csv"):
     percentage = (score / total) * 100
-    pass_status = "PASS" if percentage >= 80 else "FAIL"
+    if percentage >= 80:
+        pass_status = "PASS"
+    else:
+        pass_status = "FAIL"
     
     file_exists = Path(filepath).exists()
     

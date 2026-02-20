@@ -30,7 +30,7 @@ class Quiz:
         question = self.questions[self.index]
         correct = (answer == question["answer"])
         if correct:
-            self.score.addpoint()
+            self.score.add_point()
         self.index += 1
         return correct
 
