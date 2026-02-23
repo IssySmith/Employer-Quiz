@@ -2,6 +2,13 @@ import csv
 from pathlib import Path
 
 def export_to_csv(username: str, score: int, total: int, filepath: str = "quiz_results.csv"):
+    """
+    Exports user results to a csv file
+    
+    Writes a row containing username, score, total, percentage, and PASS/FAIL
+    status (PASS if percentage >= 80) to ``filepath``. Creates the file and
+    header row if it does not already exist.
+    """
     percentage = (score / total) * 100
     if percentage >= 80:
         pass_status = "PASS"

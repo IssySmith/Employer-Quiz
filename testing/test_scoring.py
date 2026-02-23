@@ -1,10 +1,9 @@
-"""
-Using pytest to check if the Score is set correctly
-"""
-
 from backend.scoring import Scoring
 
 def test_score_setup():
+    """
+    Using pytest to check if the Score is set correctly
+    """
     score = Scoring(0)
     assert score.get_score() == 0
     

@@ -1,0 +1,14 @@
+[theme]
+# Accent colour
+primaryColor = "#abf7b3ff"
+
+# Background color
+backgroundColor = "#FFF6E3"
+
+# Colour for sidebar and interactive widgets
+secondaryBackgroundColor = "#ffffffff"
+
+# Text colour
+textColor = "#000000ff"
+
+font = "helvetica"

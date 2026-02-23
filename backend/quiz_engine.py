@@ -1,12 +1,9 @@
-
-"""
-This class does .....
-"""
-
 from .question_loader import load_questions
 from .scoring import Scoring
 
 class Quiz:
+    """
+    """
     def __init__(self):
         data = load_questions("questions.json")
         self.questions = list(data.values())

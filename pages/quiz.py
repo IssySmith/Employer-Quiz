@@ -25,7 +25,10 @@ quiz = st.session_state.quiz
 score, total = quiz.final_score()
 completed = getattr(quiz, "index", 0)
 
-progress_fraction = 0 if total == 0 else min(completed, total) / total
+if total == 0:
+    progress_fraction = 0
+else:
+    progress_fraction = min(completed, total) / total
 st.progress(progress_fraction)
 st.caption(f"Progress: {min(completed, total)}/{total}")
 st.write(f"Score: {score} / {total}")
@@ -42,7 +45,8 @@ if not quiz.another_question() and not st.session_state.next_question:
             
     else:
         if st.button("Submit results"):
-            export_to_csv("issy", score, total)
+            username = st.session_state.get('username', 'Anonymous')
+            export_to_csv(username, score, total)
             st.success("Submitted!")
             
     st.stop()

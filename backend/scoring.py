@@ -1,10 +1,11 @@
-"""
-The class scoring is created to handle the user's points in the quiz engine.
-Losing a point is not an option, you can only get a point or none.
-"""
-
 class Scoring:
+    """
+    The class scoring is created to handle the user's points in the quiz engine.
+    """
     def __init__(self, score: int):
+        """
+        Initialises score
+        """
         self.score = score
     
     def get_score(self):
