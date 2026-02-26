@@ -89,13 +89,23 @@ To Design what my interface would look like, I created a Figma prototype with th
 
 
 ## Tech Stack Outline
-My backend code is using **Python**, this is what I have been using this module and I am comfortable coding with it but also want to experience importing the classes or functipns as it is somehting I would use in work.
+My backend code is using **Python**, this is what I have been using this module and I am comfortable coding with it but also want to experience importing the classes or functions as it is something I would use in work.
 
-To create my GUI, I decided to use **Streamlit**. At first I was going to use Tkinter as I have some previous use of coding with it. However, what changed my mind was after speaking with people I work with they recommend I use Streamlit as it is something they have sometimes used in work and would be useful to understand.
+To create my GUI, I decided to use **Streamlit**. At first I was going to use Tkinter as I have some previous use of coding with it. However, what changed my mind was after speaking with people I work with they recommend I use Streamlit. 
 
 ## Code Design
 
-### Class Diagram
+## Class Diagrams
+
+### Backend class diagram
+
+To plan what my code will look like and how each module will interact with each other I have created a mermaid class diagram.
+
+The main class used is Quiz, this handles the main quiz engine functions. It checks the what the current question is and if there is another question, as well as if the answer was correct and if not then what it was.
+
+There is another class to handle scoring, adding a point then displayong the point. 
+
+There is then 2 classes to load and export the question JSON file.
 
 ```mermaid
 classDiagram
@@ -131,51 +141,8 @@ classDiagram
     Quiz --> Scoring : uses
     Quiz --> QuestionLoader : uses
     Quiz --> QuestionExporter : uses
-    
-    note for Quiz "Main quiz engine\nManages state and flow"
-    note for Scoring "Encapsulates score logic\nFollows OOP principles"
-    note for QuestionLoader "Loads and validates\nquestion data from JSON"
-    note for QuestionExporter "Exports results to CSV\nfor manager review"
 ```
-
-### Component Interaction Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant AppPy as app.py
-    participant QuizPy as pages/quiz.py
-    participant QuizEngine as Quiz
-    participant Scoring
-    participant Loader as question_loader
-    participant Exporter as question_exporter
-    
-    User->>AppPy: Enter name
-    AppPy->>QuizPy: Navigate to quiz
-    QuizPy->>Loader: load_questions()
-    Loader-->>QuizPy: Return questions dict
-    QuizPy->>QuizEngine: Initialize Quiz()
-    QuizEngine->>Scoring: Create Scoring(0)
-    
-    loop For each question
-        QuizEngine->>QuizPy: current_question()
-        QuizPy->>User: Display question
-        User->>QuizPy: Submit answer
-        QuizPy->>QuizEngine: submit_answer(index)
-        QuizEngine->>Scoring: add_point() if correct
-        QuizEngine-->>QuizPy: Return is_correct
-        QuizPy->>User: Show feedback
-    end
-    
-    QuizEngine->>QuizPy: final_score()
-    alt Score >= 80%
-        QuizPy->>Exporter: export_to_csv()
-        Exporter-->>QuizPy: Success
-        QuizPy->>User: Show pass message
-    else Score < 80%
-        QuizPy->>User: Show fail + retry option
-    end
-```
+The backend code will then be imported into my frontend to be use with the components.
 
 # Development
 
@@ -206,7 +173,7 @@ Employer-Quiz/
 
 ## Core Components
 
-### 1. Entry Point ([`app.py`](app.py))
+### Entry Point ([`app.py`](app.py))
 
 The application starts with a simple welcome screen that collects the user's name:
 
@@ -235,7 +202,7 @@ if switch_page and user_name:
 - Uses Streamlit's session state to persist user data across pages
 - Hides the sidebar navigation to create a controlled quiz flow
 
-### 2. Question Loading ([`backend/question_loader.py`](backend/question_loader.py))
+### Question Loading ([`backend/question_loader.py`](backend/question_loader.py))
 
 This module handles loading questions from the JSON file with comprehensive error handling:
 
@@ -271,7 +238,7 @@ def load_questions(path: str) -> Dict[int, Any]:
 - Converts list-based questions to dictionary format for easier indexing
 - Returns `None` on errors with descriptive messages
 
-### 3. Scoring System ([`backend/scoring.py`](backend/scoring.py))
+### Scoring System ([`backend/scoring.py`](backend/scoring.py))
 
 A simple class-based approach to manage quiz scores:
 
@@ -294,7 +261,7 @@ class Scoring:
 - Only allows incrementing (no point deduction)
 - Returns updated score for immediate feedback
 
-### 4. Quiz Engine ([`backend/quiz_engine.py`](backend/quiz_engine.py))
+### Quiz Engine ([`backend/quiz_engine.py`](backend/quiz_engine.py))
 
 The core logic that orchestrates the quiz flow:
 
@@ -340,7 +307,7 @@ class Quiz:
 - Provides access to correct answers for feedback
 - Tracks progress through the quiz
 
-### 5. Results Export ([`backend/question_exporter.py`](backend/question_exporter.py))
+### Results Export ([`backend/question_exporter.py`](backend/question_exporter.py))
 
 Exports quiz results to CSV for manager review:
 
@@ -367,7 +334,7 @@ def export_to_csv(username: str, score: int, total: int, filepath: str = "quiz_r
 - Appends results to existing file for historical tracking
 - Uses Path library for cross-platform compatibility
 
-### 6. Quiz Interface ([`pages/quiz.py`](pages/quiz.py))
+### Quiz Interface ([`pages/quiz.py`](pages/quiz.py))
 
 The main quiz interface manages the user experience:
 
@@ -413,7 +380,7 @@ if submit:
 - Option to retake quiz if failed
 - CSV export for passing scores
 
-### 7. UI Customization ([`pages/widgets.py`](pages/widgets.py))
+### UI Customization ([`pages/widgets.py`](pages/widgets.py))
 
 Helper function to control navigation:
 
@@ -457,15 +424,6 @@ graph LR
     C --> F[Scoring]
     F --> G[CSV Export]
 ```
-
-## Error Handling
-
-The application includes comprehensive error handling:
-
-- **File Not Found**: Graceful handling when [`questions.json`](questions.json) is missing
-- **Invalid JSON**: Detection and reporting of malformed JSON
-- **Empty Input**: Validation prevents empty username submission
-- **Index Bounds**: Safe array access in quiz navigation
 
 # Testing
 
@@ -1203,10 +1161,7 @@ However, the evaluation reveals significant opportunities for enhancement. The m
 
 The project demonstrated that even a relatively simple application requires careful attention to architecture, testing, documentation, and user experience. The lessons learned about incremental development, testing discipline, and tool selection will be valuable in future projects. Most importantly, the project shows how technology can address real business needs—in this case, improving security awareness across an organization through engaging, measurable training.
 
-## References
-
-- [Gamification in the Workplace Statistics](https://www.growthengineering.co.uk/19-gamification-trends-for-2022-2025-top-stats-facts-examples/) - Growth Engineering
+## Documentation
 - [Streamlit Documentation](https://docs.streamlit.io/) - Streamlit Official Docs
 - [PyTest Documentation](https://docs.pytest.org/) - PyTest Official Docs
-- [PEP 8 Style Guide](https://peps.python.org/pep-0008/) - Python Enhancement Proposals
 - [GitHub Actions Documentation](https://docs.github.com/en/actions) - GitHub Docs

@@ -29,6 +29,7 @@ if total == 0:
     progress_fraction = 0
 else:
     progress_fraction = min(completed, total) / total
+    
 st.progress(progress_fraction)
 st.caption(f"Progress: {min(completed, total)}/{total}")
 st.write(f"Score: {score} / {total}")
