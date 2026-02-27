@@ -3,21 +3,13 @@
 ## Order of Documentation
 1. [Introduction](#introduction)
 2. [Design](#design)
-<br>
-    2.1 [Initial design](#initial-design)
-<br>
-    2.2 [Figma design](#figma-design)
-<br>
-    2.3 [Requirements](#requirements)
-<br>
-    2.4 [Tech Stack Outline](#tech-stack-outline)
-<br>
-    2.5 [Code Design](#code-design)
-<br>
 3. [Development](#development)
 4. [User Documentation](#user-documentation)
 5. [Technical Documentation](#technical-documentation)
 6. [Evaluation](#evaluation)
+
+
+Access Streamlit Deployment here: https://employer-quiz-foundationsofprogramming.streamlit.app/ (Also linked in user documentation)
 
 # Introduction
 
