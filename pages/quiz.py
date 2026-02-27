@@ -13,6 +13,7 @@ from backend.question_exporter import export_to_csv
 hide_toolbar()
 #st.title(st.session_state['username'], "progress")
 
+# Initialises state session once per user session
 if "quiz" not in st.session_state:
     st.session_state.quiz = Quiz()
 if "next_question" not in st.session_state:
@@ -25,6 +26,8 @@ quiz = st.session_state.quiz
 score, total = quiz.final_score()
 completed = getattr(quiz, "index", 0)
 
+# Creates progress bar and also ensures there is no division
+# by 0
 if total == 0:
     progress_fraction = 0
 else:
@@ -34,11 +37,13 @@ st.progress(progress_fraction)
 st.caption(f"Progress: {min(completed, total)}/{total}")
 st.write(f"Score: {score} / {total}")
 
+# If there is no more questions then the % is worked out
 if not quiz.another_question() and not st.session_state.next_question:
     st.success(f"Finished! Final score: {score}/{total}")
     if score / total * 100 < 80:
         st.write(f"Sorry you need to pass with over 80%, please try again. You got {int(score/total*100)}%")
         if st.button("Redo"):
+            # Resets quiz if score is less than 80
             st.session_state.quiz = Quiz()
             st.session_state.next_question = False
             st.session_state.feedback = ""
@@ -52,6 +57,7 @@ if not quiz.another_question() and not st.session_state.next_question:
             
     st.stop()
 
+# Shows feedback after submitting and another question
 if st.session_state.next_question:
     st.info(st.session_state.feedback)
     if quiz.another_question():
@@ -63,6 +69,7 @@ if st.session_state.next_question:
             st.session_state.next_question = False
             st.rerun()
 else:
+    # If not submitted then displays the
     question, options, number, total = quiz.current_question()
     st.markdown(f"Q{number}: {question}")
 

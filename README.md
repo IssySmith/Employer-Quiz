@@ -20,9 +20,14 @@
 6. [Evaluation](#evaluation)
 
 # Introduction
-Modern workplace environments rely on security practices to protect their important data, this means they can meet client trust but also meet regulation requirements. As companies continue to adopt complex technical systems, the risk of security breaches has grown significantly. Employees now play an essential role in safeguarding information assets, as human error remains one of the most common causes of security incidents. Creating a culture of security awareness is therefore critical to ensuring that staff can recognise threats, follow best practices, and understand their responsibilities.<br><br>
-Within IBM, where teams handle sensitive client data, intellectual property, and internal systems, the need for consistent and measurable security knowledge is particularly important. Security expectations apply to everyone, not just technical teams, and even small mistakes—such as mishandling credentials, falling for phishing attempts, or misconfiguring access permissions—can lead to serious consequences. Ensuring that employees remain informed and confident in their security understanding helps reduce these risks and supports IBM’s wider commitment to maintaining industry‑leading security standards.<br><br>
-The MVP supports this need by providing a simple, interactive quiz designed to assess employees’ security knowledge in an accessible way. By delivering short, focused questions on core security topics, the tool helps identify individuals who may require additional training. The quiz results can be reviewed by managers, allowing them to offer targeted support and ensure their teams maintain expected security competencies. This not only strengthens the organisation’s overall security posture but also builds accountability and awareness across the workforce. The MVP therefore offers a practical, lightweight method for supporting IBM’s ongoing security efforts while giving employees an engaging way to test and improve their understanding.
+
+Modern workplace environments have to handle the new rises in technology, but also new ways of security to ensure their data is protected. They must meet client trust and regulation requirements. However, the risk of security breaches has grown significantly with the more complex technical systems. Employees are now really important in safeguarding the data, as human error remains one of the most common causes of security incidents. Companies must now make a culture of security awareness so staff can recognise threat and follow best practices.<br><br>
+In IBM, an example of what teams handle are:
+- Sensitive client data
+- Intellectual property
+- Internal Systems 
+This means that they must have high knowledge on security, everyone in the team not even just technical teams as small mistakes can lead to serious consequences. Ensuring that employees remain cofident in their security understanding helps lower risks to support IBM's commitment to maintaining high standards.<br><br>
+This proposed solution (MVP) supports this need by providing a training quiz for employees to consolidate their security knowledge. It consists of cyber security questions, where the user must get over 80% to pass, and if not have to retake the quiz until they get that score. This ensures that employees have a high knowledge that IBM need, with managers being able to review their results. The MVP therefore offers a practical, lightweight method for supporting IBM’s ongoing security efforts while giving employees an engaging way to test and improve their understanding.
 
 # Design 
 
@@ -91,7 +96,7 @@ To Design what my interface would look like, I created a Figma prototype with th
 ## Tech Stack Outline
 My backend code is using **Python**, this is what I have been using this module and I am comfortable coding with it but also want to experience importing the classes or functions as it is something I would use in work.
 
-To create my GUI, I decided to use **Streamlit**. At first I was going to use Tkinter as I have some previous use of coding with it. However, what changed my mind was after speaking with people I work with they recommend I use Streamlit. 
+To create my GUI, I decided to use **Streamlit** because it allowed rapid development and simplified deployment, which aligned with my MVP goal. At first I was going to use Tkinter as I have some previous use of coding with it. However, what changed my mind was after speaking with people I work with they recommend I use Streamlit. 
 
 ## Code Design
 
@@ -146,7 +151,7 @@ The backend code will then be imported into my frontend to be use with the compo
 
 # Development
 
-This section explains the main components of the IBM Cyber Security Quiz application and how they work together to deliver a functional quiz experience.
+The next section will explain the technical aspects of my code, and how each component works together.
 
 ## Project Structure
 
@@ -189,25 +194,35 @@ st.title("Welcome to IBM's Cyber Security Quiz!")
 user_name = st.text_input("Your name: ")
 
 if user_name:
-    st.write(f"Hello {user_name}, please press start when you are ready...")
+    st.write(f"Hello {user_name}, please press enter when you are ready...")
     st.session_state['username'] = user_name
 
-switch_page = st.button("Start")
-if switch_page and user_name:
-    st.switch_page("pages/quiz.py")
+    switch_page = st.button("Start")
+    if switch_page and user_name:
+        st.switch_page("pages/quiz.py")
 ```
 
-**Key Features:**
-- Input validation ensures users cannot proceed without entering a name
-- Uses Streamlit's session state to persist user data across pages
-- Hides the sidebar navigation to create a controlled quiz flow
+- Input validation means that users cannot proceed without entering a name
+- Uses Streamlit's session state to access the user's name across different pages
+- Hides the sidebar navigation to ensure user can't navigate themselves
 
 ### Question Loading ([`backend/question_loader.py`](backend/question_loader.py))
 
 This module handles loading questions from the JSON file with comprehensive error handling:
 
 ```python
+import json
+from typing import Dict, Any
+
 def load_questions(path: str) -> Dict[int, Any]:
+    """
+    Loads questions from a JSON file and return them indexed by position.
+    
+    If the file is empty or had whitespace only it is invalid.
+    Only lists and dictionaries in the file is allowed.
+    If the file cannot be found an exception is placed to show the user the error.
+    If the file is found but has invalid JSON, then such error is also displayed.
+    """
     try:
         with open(path, "r", encoding="utf-8") as file:
             raw_data = file.read()
@@ -216,7 +231,7 @@ def load_questions(path: str) -> Dict[int, Any]:
                 print("invalid JSON in questions file")
                 return None
                 
-            data = json.loads(raw_data)
+            data = json.loads(raw_data)  
             
         if isinstance(data,list):
             return {i: q for i, q in enumerate(data)}
@@ -232,11 +247,10 @@ def load_questions(path: str) -> Dict[int, Any]:
         return None
 ```
 
-**Key Features:**
 - Validates file existence and JSON format
-- Handles empty files gracefully
-- Converts list-based questions to dictionary format for easier indexing
-- Returns `None` on errors with descriptive messages
+- Handles empty files 
+- Ensures dictionary structure is used
+- Returns None on errors with a message to describe
 
 ### Scoring System ([`backend/scoring.py`](backend/scoring.py))
 
@@ -244,45 +258,70 @@ A simple class-based approach to manage quiz scores:
 
 ```python
 class Scoring:
+    """
+    The class scoring is created to handle the user's points in the quiz engine.
+    """
     def __init__(self, score: int):
+        """
+        Initialises score
+        """
         self.score = score
     
     def get_score(self):
         return self.score
     
     def add_point(self) -> int:
-        self.score +=1
+        self.score +=1 
         return self.score
 ```
-
-**Design Rationale:**
-- Encapsulates score state using OOP principles
-- Provides controlled access through methods
-- Only allows incrementing (no point deduction)
-- Returns updated score for immediate feedback
+I chose to add the scoring system as a separate function because it encapsulates the score state and 
+provides controlled access.
 
 ### Quiz Engine ([`backend/quiz_engine.py`](backend/quiz_engine.py))
 
-The core logic that orchestrates the quiz flow:
+This is the core logic that handles the main quiz flow:
 
 ```python
+from .question_loader import load_questions
+from .scoring import Scoring
+
 class Quiz:
+    """
+    Class to handle quiz functions 
+    """
     def __init__(self):
+        """
+        Initialises the questions, options, and answers
+        As well as the number on and score using class imported from scoring
+        """
         data = load_questions("questions.json")
         self.questions = list(data.values())
         self.index = 0
         self.score = Scoring(0)
 
     def another_question(self):
-        return self.index < len(self.questions)
+        """
+        Checks if there is another question and not at the end of list
+        """
+        if self.index < len(self.questions):
+            return True
+        else:
+            return False
 
     def current_question(self):
+        """
+        Returns the current question, options, index and the length of questions
+        """
         if self.index >= len(self.questions):
             return None
-        q = self.questions[self.index]
-        return q["question"], q["options"], self.index + 1, len(self.questions)
+        else:
+            q = self.questions[self.index]
+            return q["question"], q["options"], self.index + 1, len(self.questions)
 
     def submit_answer(self, answer: int):
+        """
+        Checks if answer is correct when submitted
+        """
         question = self.questions[self.index]
         correct = (answer == question["answer"])
         if correct:
@@ -291,6 +330,9 @@ class Quiz:
         return correct
 
     def correct_answer(self):
+        """
+        Shows what the correct answer is if the user got the answer wrong
+        """
         previous = self.index - 1
         if previous < 0:
             return ""
@@ -298,10 +340,13 @@ class Quiz:
         return question["options"][question["answer"]]
 
     def final_score(self):
+        """
+        Returns final score
+        """
         return self.score.get_score(), len(self.questions)
+
 ```
 
-**Key Features:**
 - Manages question iteration and state
 - Validates answers and updates scores
 - Provides access to correct answers for feedback
@@ -309,10 +354,20 @@ class Quiz:
 
 ### Results Export ([`backend/question_exporter.py`](backend/question_exporter.py))
 
-Exports quiz results to CSV for manager review:
+Exports quiz results to CSV for the user's manager to review:
 
 ```python
+import csv
+from pathlib import Path
+
 def export_to_csv(username: str, score: int, total: int, filepath: str = "quiz_results.csv"):
+    """
+    Exports user results to a csv file
+    
+    Writes a row containing username, score, total, percentage, and PASS/FAIL
+    status (PASS if percentage >= 80) to ``filepath``. Creates the file and
+    header row if it does not already exist.
+    """
     percentage = (score / total) * 100
     if percentage >= 80:
         pass_status = "PASS"
@@ -328,7 +383,6 @@ def export_to_csv(username: str, score: int, total: int, filepath: str = "quiz_r
         writer.writerow([username, score, total, f"{percentage:.1f}%", pass_status])
 ```
 
-**Key Features:**
 - Calculates percentage and pass/fail status
 - Creates CSV with headers if file doesn't exist
 - Appends results to existing file for historical tracking
@@ -338,8 +392,9 @@ def export_to_csv(username: str, score: int, total: int, filepath: str = "quiz_r
 
 The main quiz interface manages the user experience:
 
-**State Management:**
+**Streamlit State Management:**
 ```python
+# Initialises state session once per user session
 if "quiz" not in st.session_state:
     st.session_state.quiz = Quiz()
 if "next_question" not in st.session_state:
@@ -350,10 +405,11 @@ if "feedback" not in st.session_state:
 
 **Progress Tracking:**
 ```python
-score, total = quiz.final_score()
-completed = getattr(quiz, "index", 0)
-
-progress_fraction = 0 if total == 0 else min(completed, total) / total
+if total == 0:
+    progress_fraction = 0
+else:
+    progress_fraction = min(completed, total) / total
+    
 st.progress(progress_fraction)
 st.caption(f"Progress: {min(completed, total)}/{total}")
 st.write(f"Score: {score} / {total}")
@@ -373,12 +429,12 @@ if submit:
 ```
 
 **Key Features:**
-- Real-time progress bar and score display
-- Immediate feedback on answer correctness
+- Progress bar and score display
+- Feedback on answer correctness
 - Shows correct answer when user is wrong
-- 80% pass threshold enforcement
-- Option to retake quiz if failed
-- CSV export for passing scores
+- 80% pass 
+- Retake quiz if failed
+- CSV export 
 
 ### UI Customization ([`pages/widgets.py`](pages/widgets.py))
 
@@ -386,6 +442,10 @@ Helper function to control navigation:
 
 ```python
 def hide_toolbar():
+    """
+    This function removes the toolbar in the streamlit page.
+    This ensures that the user can't go between the pages by themselves.
+    """
     st.markdown(
     """
     <style>
@@ -398,61 +458,37 @@ def hide_toolbar():
 )
 ```
 
-**Purpose:**
 - Hides Streamlit's default sidebar navigation
-- Ensures users follow the intended quiz flow
-- Prevents skipping questions or returning to previous pages
+- Users have to follow the intended quiz flow
 
 ## Object-Oriented Design
 
-The application demonstrates OOP principles through:
+ chose OOP because the quiz has distinct responsibilities that help being modelled as separate classes with controlled interfaces
 
-1. **Encapsulation**: [`Scoring`](backend/scoring.py:6) class encapsulates score state
+1. **Encapsulation**: [`Scoring`](backend/scoring.py:6) class encapsulates score state.
+Scoring encapsulated the score state so scoring can only be modified by add_point() and get_point(), preventing the quiz engine
+from directly changing the score, this helps reduce bugs.
+
 2. **Composition**: [`Quiz`](backend/quiz_engine.py:9) class uses Scoring object
+The Quiz class owns a Scoring instance ``(self.score = Scoring(0))``, meaning scoring logic dedicated to an object rather than handled directly inside Quiz. This keeps each class focused on a single responsibility.
+
 3. **Single Responsibility**: Each class has one clear purpose
-4. **Method-based Interface**: Controlled access through public methods
-
-## Data Flow
-
-```mermaid
-graph LR
-    A[questions.json] --> B[question_loader.py]
-    B --> C[Quiz Engine]
-    C --> D[Streamlit UI]
-    D --> E[User Input]
-    E --> C
-    C --> F[Scoring]
-    F --> G[CSV Export]
-```
+This helps readbility of code, and also separates the logic meaning it is easier to read the code and also to use.
 
 # Testing
 
 ## Testing Strategy
+My testing approach for this project involved automated unit testing, manual testing, and continuous integration.
 
-The application employs a multi-layered testing approach to ensure reliability and correctness:
+I wrote my automated unit tests using PyTest to validate the core backend logic, such as score calculation and question loading. These tests focus on predictable behaviour and ensure that given the same inputs, the same outputs are returned. This was important because the quiz engine contains the core business logic and needs to behave consistently.
 
-### 1. **Automated Unit Testing**
-- **Framework**: PyTest
-- **Purpose**: Validate core business logic in isolation
-- **Coverage**: Scoring system, question loading, data validation
-- **Benefits**: Fast execution, repeatable, catches regressions early
+Manual testing was used for the GUI components, as Streamlit interfaces are not easily unit tested. This involved running the application and validating user flows such as name input validation, quiz progression, result calculation, and CSV export.
 
-### 2. **Manual Functional Testing**
-- **Purpose**: Verify end-to-end user workflows
-- **Coverage**: GUI interactions, user journey, visual feedback
-- **Benefits**: Validates real user experience, catches UI issues
+In addition, GitHub Actions was configured to automatically run the test suite on each commit. This continuous integration setup ensures that changes do not introduce regressions and reflects professional development practices used in industry.
 
-### 3. **Continuous Integration**
-- **Platform**: GitHub Actions
-- **Triggers**: Every push and pull request to main branch
-- **Checks**: Linting (flake8) and automated tests (pytest)
-- **Benefits**: Ensures code quality before merging
+These tests all help ensure that my requirements are met.
 
-## Automated Test Results
-
-### Test Suite Overview
-
-The project includes three test files covering critical functionality:
+## Automated tests
 
 #### 1. [`test_scoring.py`](testing/test_scoring.py) - Score Management Tests
 
@@ -470,9 +506,9 @@ def test_addpoint():
 ```
 
 **Tests:**
-- ✅ Score initialization with different values
-- ✅ Point addition functionality
-- ✅ Score retrieval accuracy
+- Score initialization with different values
+- Point addition functionality
+- Score retrieval accuracy
 
 #### 2. [`test_load_questions.py`](testing/test_load_questions.py) - Data Loading Tests
 
@@ -488,102 +524,50 @@ def test_load_questions_false():
 ```
 
 **Tests:**
-- ✅ Successful loading of valid JSON file
-- ✅ Returns dictionary format
-- ✅ Handles missing files gracefully
-- ✅ Handles empty/invalid files gracefully
+- Successful loading of valid JSON file
+- Returns dictionary format
+- Handles missing files gracefully
+- Handles invalid files gracefully
 
-### PyTest Execution Results
+All tests ran in pytest have successfully passed for my code.
 
-**Summary:**
-- **Total Tests**: 4
-- **Passed**: 4
-- **Failed**: 0
-- **Execution Time**: < 1 second
-
-### Continuous Integration Results
-
-The GitHub Actions workflow ([`.github/workflows/python-app.yml`](.github/workflows/python-app.yml)) runs automatically on every commit:
-
-**CI Pipeline Steps:**
-1. ✅ Checkout code
-2. ✅ Set up Python 3.10
-3. ✅ Install dependencies
-4. ✅ Lint with flake8 (syntax and style checks)
-5. ✅ Run pytest suite
+The GitHub Actions workflow ([`.github/workflows/python-app.yml`](.github/workflows/python-app.yml)) runs automatically on every commit.
 
 ## Manual Testing Results
 
 The following table documents manual testing of all functional requirements:
 
-| Test ID | Requirement | How it was tested | Pass/Fail | Evidence |
-|---------|-------------|-------------------|-----------|----------|
-| 1 | FR1 - Load Questions | Started application and verified questions loaded | ✅ Pass | Questions displayed in quiz |
-| 2 | FR1.1 - JSON File | Confirmed questions read from [`questions.json`](questions.json) | ✅ Pass | File successfully parsed |
-| 3 | FR1.2 - Dictionary Format | Inspected loaded data structure in debugger | ✅ Pass | Data in dict format |
-| 4 | FR1.3 - PyTest Validation | Ran `pytest testing/test_load_questions.py` | ✅ Pass | All tests passed |
-| 5 | FR1.4.1 - Missing File Error | Renamed questions.json and ran app | ✅ Pass | "File not found" message |
-| 6 | FR1.4.2 - Invalid JSON Error | Used [`blank.json`](blank.json) as test file | ✅ Pass | "invalid JSON" message |
-| 7 | FR2 - GUI Present | Launched application | ✅ Pass | Streamlit GUI displayed |
-| 8 | FR2.1 - Streamlit Framework | Verified using `streamlit run app.py` | ✅ Pass | App runs in browser |
-| 9 | FR2.1.1 - Welcome Screen | Opened application | ✅ Pass | Welcome screen shown |
-| 10 | FR2.1.2 - Question Screen | Started quiz | ✅ Pass | Questions displayed correctly |
-| 11 | FR2.1.3 - Results Screen | Completed quiz | ✅ Pass | Final score shown |
-| 12 | FR3.1 - Name Input | Checked welcome screen | ✅ Pass | Text input field present |
-| 13 | FR3.2 - Empty Name Validation | Clicked Start without entering name | ✅ Pass | Cannot proceed without name |
-| 14 | FR4.1 - All Questions Shown | Completed full quiz | ✅ Pass | All 10 questions appeared |
-| 15 | FR4.2 - Random Order | Ran quiz multiple times | ✅ Pass | Question order varies |
-| 16 | FR5.1 - Score Accuracy | Answered known questions | ✅ Pass | Score matches correct answers |
-| 17 | FR5.1.2 - Percentage Calculation | Checked final score display | ✅ Pass | Percentage calculated correctly |
-| 18 | FR5.1.3 - Pass/Fail Threshold | Tested scores above/below 80% | ✅ Pass | Correct pass/fail determination |
-| 19 | FR6.1 - Export File Created | Completed quiz with passing score | ✅ Pass | [`quiz_results.csv`](quiz_results.csv) created |
-| 20 | FR6.1.2 - CSV Contents | Opened exported file | ✅ Pass | Contains name, score, date, status |
+## Manual Testing Results
 
-### Non-Functional Testing Results
+| Test ID | Requirement Group | Test Description | Method | Expected Result | Actual Result | Screenshot |
+|---------|-------------------|-----------------|--------|----------------|---------------|---------------|
+| FR1 | Question Loading & Validation | Verify questions load correctly from JSON and handle invalid files | Ran application with valid, missing, and invalid JSON files | Valid file loads correctly- missing/invalid file handled gracefully | Pass | ![Screenshot of questions loading successfully](question-load.png) |
+| FR2 | GUI & Navigation | Verify welcome screen, quiz screen, and results screen display correctly | Completed full quiz flow | All screens render correctly and navigation flows as intended | Pass | ![Screenshot of welcome screen](welcome-screen.png) |
+| FR3 | Input Validation | Ensure user cannot proceed without entering a name | Attempted to click Start without input | Application prevents progression | Pass | ![Screenshot of input validation](empty-name.png) |
+| FR4 | Quiz Flow & Progress Tracking | Confirm questions iterate correctly and progress bar updates | Completed full quiz attempt | Questions display sequentially; progress and score update accurately | Pass | ![Screenshot of progress bar](progress.png) |
+| FR5 | Scoring & Pass Threshold | Validate scoring logic and 80% pass requirement | Tested quiz with scores above and below 80% | Correct score calculation and pass/fail status | Pass | ![Screenshot of Passing quiz](pass.png) ![Screenshot of failing quiz](fail.png) |
+| FR6 | Data Export | Confirm results are exported to CSV with correct fields | Completed quiz and inspected output file | CSV created with username, score, percentage, and status | Pass | N/A |
+| NFR1 | Performance | Confirm application loads and responds quickly | Measured load time and interaction response | Application loads within 5 seconds and responds instantly | Pass | N/A |
+| NFR2 | Reliability & Error Handling | Test invalid inputs and edge cases | Triggered missing files and incorrect inputs | Application remains stable and displays user-friendly errors | Pass | ![Screenshot of pytest working](pytest.png) |
 
-| Test ID | Requirement | How it was tested | Pass/Fail | Evidence |
-|---------|-------------|-------------------|-----------|----------|
-| NFR1.1 | Load Time < 5s | Measured startup time | ✅ Pass | Loads in ~2 seconds |
-| NFR1.2 | Responsive Interactions | Clicked buttons and submitted answers | ✅ Pass | Instant response |
-| NFR2.1 | Feedback Display | Submitted correct and incorrect answers | ✅ Pass | Immediate feedback shown |
-| NFR2.1.1 | Correct Answer Indicator | Answered correctly | ✅ Pass | "Correct!" message |
-| NFR2.1.2 | Incorrect Answer Indicator | Answered incorrectly | ✅ Pass | "Wrong!" message |
-| NFR2.1.3 | Show Correct Answer | Answered incorrectly | ✅ Pass | Correct answer displayed |
-| NFR3.1 | Progress Display | Monitored during quiz | ✅ Pass | Progress bar visible |
-| NFR3.1.1 | Progress Bar | Watched progress indicator | ✅ Pass | Bar updates per question |
-| NFR3.1.2 | Progress Updates | Completed questions | ✅ Pass | Shows "X/10" format |
-| NFR4.1 | No Crashes on Invalid Input | Tested edge cases | ✅ Pass | Application stable |
-| NFR4.2 | Graceful Error Handling | Triggered various errors | ✅ Pass | User-friendly messages |
-| NFR5.1 | Code Readability | Code review | ✅ Pass | Clear structure and naming |
-| NFR5.2 | PyTest Compatibility | Ran test suite | ✅ Pass | All tests executable |
+**If images don't load correctly in testing table please go to the images file to access :)**
 
-## Test Coverage Analysis
-
-**Current Coverage:**
-- ✅ **Core Logic**: 100% (scoring, question loading)
-- ✅ **Error Handling**: 100% (file errors, validation)
-- ⚠️ **UI Components**: Manual testing only
-- ⚠️ **Integration**: Limited automated coverage
-
-**Future Improvements:**
-- Add integration tests for full quiz flow
-- Implement UI testing with Selenium or Playwright
-- Add performance benchmarking tests
-- Increase edge case coverage
+### Future Improvements for Testing:
+- Add some integration tests for full quiz flow
+- Add UI testing with Selenium 
+- Increase edge case coverage<br>
+<br>
 
 # User Documentation
 
-This guide explains how to use the IBM Cyber Security Quiz application as an employee.
-
-## Getting Started
+Here is how you can access the Cyber Security Quiz as an employee.
 
 ### Prerequisites
-- Access to the quiz application (URL provided by your manager)
-- A modern web browser (Chrome, Firefox, Safari, or Edge)
+- Access to the quiz application (https://employer-quiz-foundationsofprogramming.streamlit.app/)
+- A web browser (Chrome, Firefox, Safari, or Edge)
 - 5-10 minutes to complete the quiz
 
 ### Accessing the Quiz
-
 1. Open your web browser
 2. Navigate to the quiz URL provided by your manager
 3. Wait for the welcome screen to load
@@ -594,7 +578,8 @@ This guide explains how to use the IBM Cyber Security Quiz application as an emp
 
 1. On the welcome screen, you'll see a text input field labeled "Your name:"
 2. Type your full name (e.g., "John Smith")
-3. Click the **Start** button to begin
+3. Press Enter to reveal start button
+4. Click the **Start** button to begin
 
 **Note:** You cannot proceed without entering your name.
 
@@ -611,8 +596,8 @@ For each question:
 
 After submitting each answer:
 
-- ✅ **Correct Answer**: You'll see "Correct!" in green
-- ❌ **Incorrect Answer**: You'll see "Wrong! The correct answer is: [answer]" in red
+- **Correct Answer**: You'll see "Correct!" in green
+- **Incorrect Answer**: You'll see "Wrong! The correct answer is: [answer]" in red
 
 Click **Next question** to continue.
 
@@ -620,7 +605,7 @@ Click **Next question** to continue.
 
 Throughout the quiz, you can monitor:
 
-- **Progress Bar**: Visual indicator at the top showing completion percentage
+- **Progress Bar**: Visual showing the completion percentage
 - **Progress Counter**: Text showing "Progress: X/10"
 - **Current Score**: Displays "Score: X / 10"
 
@@ -629,65 +614,13 @@ Throughout the quiz, you can monitor:
 After completing all questions:
 
 #### If You Pass (80% or higher):
-- You'll see your final score and percentage
+- You'll see your final score
 - Click **Submit results** to save your score
 - Your results will be recorded for your manager to review
-- ✅ **Congratulations!** You've demonstrated strong security knowledge
 
 #### If You Don't Pass (below 80%):
 - You'll see your score and a message indicating you need to retake the quiz
 - Click **Redo** to start again
-- Take time to review IBM's security policies before retrying
-- You can retake the quiz as many times as needed
-
-## Quiz Content
-
-The quiz covers essential cyber security topics including:
-
-- 🎣 **Phishing Recognition**: Identifying suspicious emails
-- 🔒 **Password Security**: Best practices for strong passwords
-- 💻 **Device Security**: Locking workstations and protecting devices
-- 📁 **Data Protection**: Handling confidential information
-- 🌐 **Network Security**: Safe use of Wi-Fi and VPN
-- 👤 **Social Engineering**: Recognizing manipulation attempts
-- 🔄 **Security Updates**: Understanding their importance
-- 🚨 **Incident Response**: What to do when something goes wrong
-
-## Tips for Success
-
-1. **Read Carefully**: Some questions have subtle differences in the options
-2. **Think Practically**: Consider real workplace scenarios
-3. **Don't Rush**: You have unlimited time to complete the quiz
-4. **Learn from Mistakes**: If you fail, review the correct answers before retrying
-5. **Stay Updated**: Security best practices evolve, so retake periodically
-
-## Frequently Asked Questions
-
-**Q: How long does the quiz take?**
-A: Most employees complete it in 5-10 minutes.
-
-**Q: Can I pause and resume later?**
-A: No, the quiz must be completed in one session. However, there's no time limit.
-
-**Q: What happens if I close the browser?**
-A: Your progress will be lost, and you'll need to start over.
-
-**Q: How many times can I retake the quiz?**
-A: Unlimited. You can retake it as many times as needed to pass.
-
-**Q: Who can see my results?**
-A: Your manager and the security team can access your results for training purposes.
-
-**Q: What if I have technical issues?**
-A: Contact your IT support team or your manager for assistance.
-
-## Support
-
-If you encounter any issues or have questions:
-
-- **Technical Issues**: Contact IT Support at support@ibm.com
-- **Quiz Content Questions**: Contact your manager or the Security Team
-- **Accessibility Needs**: Contact HR for accommodations
 
 # Technical Documentation
 
@@ -707,11 +640,6 @@ See [`requirements.txt`](requirements.txt):
 streamlit
 ```
 
-Additional development dependencies:
-```
-pytest
-flake8
-```
 
 ## Installation
 
@@ -725,10 +653,6 @@ cd Employer-Quiz
 ### 2. Create Virtual Environment (Recommended)
 
 ```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
 # macOS/Linux
 python3 -m venv venv
 source venv/bin/activate
@@ -738,12 +662,6 @@ source venv/bin/activate
 
 ```bash
 pip install -r requirements.txt
-```
-
-### 4. Install Development Dependencies
-
-```bash
-pip install pytest flake8
 ```
 
 ## Running the Application
@@ -763,41 +681,6 @@ For production deployment, consider:
 1. **Streamlit Cloud**: Deploy directly from GitHub
 2. **Docker**: Containerize the application
 3. **Cloud Platforms**: AWS, Azure, or Google Cloud
-
-Example Streamlit Cloud deployment:
-```bash
-# Push to GitHub
-git push origin main
-
-# Configure in Streamlit Cloud dashboard
-# Point to: app.py
-```
-
-## Running Tests
-
-### Run All Tests
-
-```bash
-pytest
-```
-
-### Run Specific Test File
-
-```bash
-pytest testing/test_scoring.py
-```
-
-### Run with Verbose Output
-
-```bash
-pytest -v
-```
-
-### Run with Coverage Report
-
-```bash
-pytest --cov=backend --cov-report=html
-```
 
 ## Code Structure
 
@@ -881,23 +764,6 @@ Questions are stored in [`questions.json`](questions.json):
 - `options` (array): List of possible answers
 - `answer` (integer): Index of correct answer (0-based)
 
-## Continuous Integration
-
-### GitHub Actions Workflow
-
-File: [`.github/workflows/python-app.yml`](.github/workflows/python-app.yml)
-
-**Triggers:**
-- Push to main branch
-- Pull requests to main branch
-
-**Steps:**
-1. Checkout code
-2. Set up Python 3.10
-3. Install dependencies
-4. Lint with flake8
-5. Run pytest
-
 ## Adding New Questions
 
 1. Open [`questions.json`](questions.json)
@@ -925,241 +791,39 @@ To change, edit [`pages/quiz.py`](pages/quiz.py:35):
 if score / total * 100 < 80:  # Change 80 to desired percentage
 ```
 
-## Troubleshooting
-
-### Common Issues
-
-**Issue**: "File not found" error
-**Solution**: Ensure [`questions.json`](questions.json) exists in root directory
-
-**Issue**: Tests fail with import errors
-**Solution**: Set PYTHONPATH: `export PYTHONPATH=$PWD`
-
-**Issue**: Streamlit won't start
-**Solution**: Check if port 8501 is available, or specify different port:
-```bash
-streamlit run app.py --server.port 8502
-```
-
-**Issue**: Questions don't randomize
-**Solution**: This is expected behavior in current version. To add randomization, modify [`backend/quiz_engine.py`](backend/quiz_engine.py:10):
-```python
-import random
-def __init__(self):
-    data = load_questions("questions.json")
-    self.questions = list(data.values())
-    random.shuffle(self.questions)  # Add this line
-```
-
-## API Reference
-
-### `load_questions(path: str) -> Dict[int, Any]`
-
-Loads quiz questions from JSON file.
-
-**Parameters:**
-- `path` (str): Relative or absolute path to JSON file
-
-**Returns:**
-- `Dict[int, Any]`: Dictionary mapping indices to question objects
-- `None`: If file not found or invalid
-
-**Raises:**
-- Prints error messages but doesn't raise exceptions
-
-### `Scoring` Class
-
-#### `__init__(score: int)`
-Initialize scoring object.
-
-#### `get_score() -> int`
-Returns current score value.
-
-#### `add_point() -> int`
-Increments score by 1 and returns new value.
-
-### `Quiz` Class
-
-#### `__init__()`
-Loads questions and initializes quiz state.
-
-#### `another_question() -> bool`
-Returns True if more questions remain.
-
-#### `current_question() -> tuple`
-Returns (question_text, options_list, question_number, total_questions).
-
-#### `submit_answer(answer: int) -> bool`
-Processes answer and returns True if correct.
-
-#### `correct_answer() -> str`
-Returns text of correct answer for previous question.
-
-#### `final_score() -> tuple`
-Returns (score, total_questions).
-
-### `export_to_csv(username: str, score: int, total: int, filepath: str = "quiz_results.csv")`
-
-Exports quiz results to CSV file.
-
-**Parameters:**
-- `username`: User's name
-- `score`: Number of correct answers
-- `total`: Total number of questions
-- `filepath`: Output file path (default: "quiz_results.csv")
-
-## Security Considerations
-
-- **Input Validation**: User names are required but not sanitized for CSV export
-- **Data Storage**: Results stored in plain text CSV
-- **Authentication**: No authentication implemented (suitable for internal use)
-- **HTTPS**: Recommended for production deployment
-
-## Performance Optimization
-
-Current performance is excellent for the use case:
-- Load time: ~2 seconds
-- Question rendering: Instant
-- CSV export: < 100ms
-
-For scaling to thousands of users:
-- Consider database instead of CSV
-- Implement caching for question data
-- Add load balancing for multiple instances
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make changes and add tests
-4. Run tests: `pytest`
-5. Run linter: `flake8 .`
-6. Commit: `git commit -m "Description"`
-7. Push: `git push origin feature-name`
-8. Create Pull Request
-
-## License
-
-See [`LICENSE`](LICENSE) file for details.
-
 # Evaluation
 
 ## What Went Well
 
-### 1. **Clear Project Structure**
-The modular architecture with separate backend and pages directories made the codebase easy to navigate and maintain. Separating concerns between data loading, quiz logic, scoring, and UI components followed best practices and made testing straightforward.
+Overall I am really happy with my structure, I tried to use frontend and backend files to separate code and make it easier to read. I also did this to reflect how my team structure files i n our projects. I think I managed to do this successfully, but maybe with some improvements in the frontend part as that is the bit I have less technical experience in. I'm also happy with my use of streamlit, it means I was able to deploy the application with also the session state management allowing the quiz to flow well. I believe that when looking at the application it looks decent and has lots of opportunity to grow. 
 
-### 2. **Effective Use of Streamlit**
-Choosing Streamlit as the GUI framework proved to be an excellent decision. It allowed rapid development of an interactive interface without extensive front-end coding. The session state management handled quiz flow elegantly, and the built-in components (progress bars, radio buttons, buttons) provided a professional appearance with minimal effort.
-
-### 3. **Robust Error Handling**
-The [`question_loader.py`](backend/question_loader.py) module includes comprehensive error handling for missing files, empty files, and invalid JSON. This defensive programming approach ensures the application fails gracefully rather than crashing, improving user experience and making debugging easier.
-
-### 4. **Object-Oriented Design**
-Implementing the [`Scoring`](backend/scoring.py:6) and [`Quiz`](backend/quiz_engine.py:9) classes demonstrated solid OOP principles. Encapsulation of state and behavior made the code more maintainable and testable. The composition pattern (Quiz using Scoring) showed understanding of how objects can work together.
-
-### 5. **Automated Testing and CI/CD**
-Setting up PyTest for unit testing and GitHub Actions for continuous integration established a professional development workflow. The automated tests catch regressions early, and the CI pipeline ensures code quality standards are maintained. This approach aligns with industry best practices and would scale well in a team environment.
-
-### 6. **User-Centered Design**
-The Figma prototyping phase helped visualize the user journey before coding, resulting in a clean, intuitive interface. The gamification approach (immediate feedback, progress tracking, pass/fail system) makes the security training more engaging than traditional methods. Research showing 85% increased engagement with gamification ([source](https://www.growthengineering.co.uk/19-gamification-trends-for-2022-2025-top-stats-facts-examples/)) validated this design choice.
-
-### 7. **Documentation Quality**
-Comprehensive docstrings in all modules explain purpose and functionality clearly. The README structure follows professional standards with clear sections for different audiences (users vs. developers). Code comments explain complex logic without being excessive.
 
 ## Areas for Improvement
 
-### 1. **Limited Test Coverage**
-While the core logic has unit tests, the UI components lack automated testing. The [`pages/quiz.py`](pages/quiz.py) file contains significant logic that's only manually tested. **Future improvement**: Implement integration tests using Selenium or Playwright to automate UI testing and increase confidence in the full user journey.
+Since this is just a short project, there are many things I would further wish to implement. For example, randomizing the order of the questions and options, this could be done using ``randint``. This would ensure that employees can't remember the order of the answers. 
 
-### 2. **Question Randomization Not Implemented**
-Although listed as a functional requirement (FR4.2), questions currently appear in the same order each time. This reduces quiz effectiveness as users could memorize question positions. **Future improvement**: Add `random.shuffle(self.questions)` in the [`Quiz.__init__()`](backend/quiz_engine.py:10) method to randomize question order on each attempt.
+The biggest change I would implement is using a database as storage. It is more industry standard and provides more opportunities:
+- Better security
+- Better write protection
+- Use of queries
+- Data validation
+- User authentication
+- Understanding of which manager needs what data
 
-### 3. **Hardcoded Username in Export**
-The [`pages/quiz.py`](pages/quiz.py:45) file has a hardcoded username ("issy") in the export function call instead of using the session state username. This is clearly a development artifact that should have been caught in code review. **Future improvement**: Change to `export_to_csv(st.session_state['username'], score, total)` to use the actual user's name.
-
-### 4. **CSV Storage Limitations**
-Using CSV for persistent storage is simple but has limitations:
-- No concurrent write protection (could corrupt data with multiple simultaneous users)
-- No query capabilities (difficult to generate reports or analytics)
-- No data validation or constraints
-- Security concerns (plain text storage)
-
-**Future improvement**: Migrate to a proper database (SQLite for small scale, PostgreSQL for production) with proper schema design, indexes, and query capabilities. This would enable features like:
-- Manager dashboards showing team performance
-- Historical trend analysis
-- Automated reminders for employees who haven't taken the quiz
-- Data export in multiple formats
-
-### 5. **No Authentication or Authorization**
-The current system has no user authentication, relying on honor system for name entry. Anyone could enter any name and submit results. **Future improvement**: Integrate with IBM's SSO (Single Sign-On) system to:
-- Automatically populate username from authenticated session
-- Prevent result tampering
-- Track who has/hasn't completed the quiz
-- Enable role-based access (employees vs. managers vs. admins)
-
-### 6. **Limited Accessibility Features**
-While Streamlit provides basic accessibility, the application hasn't been tested with screen readers or keyboard-only navigation. Color choices for correct/incorrect feedback may not be sufficient for colorblind users. **Future improvement**:
-- Add ARIA labels for screen readers
-- Ensure full keyboard navigation support
-- Use icons in addition to colors for feedback (✓ and ✗ symbols)
-- Test with accessibility tools like WAVE or axe DevTools
-- Add text size controls
-
-### 7. **No Analytics or Insights**
-The application collects results but provides no analysis or insights. Managers can't easily identify:
-- Which questions are most frequently missed
-- Common knowledge gaps across the team
-- Trends over time
-- Correlation between attempts and success
-
-**Future improvement**: Build an analytics dashboard showing:
-- Question difficulty metrics (% correct per question)
-- Team performance heatmaps
-- Individual progress tracking
-- Automated recommendations for targeted training
-
-### 8. **Incomplete Docstrings**
-Some modules like [`backend/quiz_engine.py`](backend/quiz_engine.py:2) have placeholder docstrings ("This class does .....") that were never completed. **Future improvement**: Complete all docstrings with proper descriptions, parameter documentation, and return value specifications following PEP 257 conventions.
-
-### 9. **No Deployment Documentation**
-While the technical documentation covers local development, there's no guidance on production deployment, environment configuration, or scaling considerations. **Future improvement**: Add deployment guides for:
-- Streamlit Cloud deployment
-- Docker containerization
-- Environment variable management
-- Monitoring and logging setup
-- Backup and disaster recovery procedures
-
-### 10. **Single Language Support**
-The application is English-only, which may limit accessibility for IBM's global workforce. **Future improvement**: Implement internationalization (i18n) to support multiple languages, particularly for regions where English isn't the primary language.
+Another change I would add is more accessibility, such as testing with screen readers and keyboard-only navigation. Also, more analysis, this could be done using AI to find patterns in most common wrong answers and recommendations of what training to look at.
 
 ## Lessons Learned
-
-### Technical Lessons
-1. **Start with Testing**: Writing tests alongside code (TDD approach) would have caught issues like the hardcoded username earlier
-2. **Code Review Value**: A peer review process would have identified incomplete docstrings and implementation gaps
-3. **Prototype Early**: The Figma design phase saved significant development time by clarifying requirements upfront
-4. **Framework Selection Matters**: Streamlit's rapid development capabilities were perfect for this MVP, validating the importance of choosing appropriate tools
-
-### Process Lessons
-1. **Requirements Traceability**: The structured requirements list (FR1, FR1.1, etc.) made testing systematic and comprehensive
-2. **Incremental Development**: Building and testing one feature at a time prevented overwhelming complexity
-3. **Documentation Discipline**: Writing documentation alongside code kept it accurate and complete
-4. **CI/CD Early**: Setting up GitHub Actions from the start caught issues immediately rather than at the end
-
-### Professional Development
-1. **Real-World Application**: Building a tool for actual workplace use (security training) provided motivation and context
-2. **Industry Tools**: Gaining experience with Streamlit, PyTest, and GitHub Actions builds relevant professional skills
-3. **Security Awareness**: Researching cyber security topics for quiz content increased personal security knowledge
-4. **User-Centered Thinking**: Considering the employee experience led to better design decisions
+- A peer review process would have identified implementation gaps
+- The Figma design phase saved significant development time by clarifying requirements upfront
+- Streamlit's rapid development capabilities were perfect for this MVP, validating the importance of choosing appropriate tools
+- The structured requirements list (FR1, FR1.1, etc.) made testing systematic and comprehensive
+- Building and testing one feature at a time prevented overwhelming complexity
+- Writing documentation alongside code kept it accurate and complete
+- Setting up GitHub Actions from the start caught issues immediately rather than at the end
 
 ## Conclusion
 
-This project successfully delivered a functional MVP for IBM's cyber security training needs. The application meets all core requirements: it has a GUI, persistent storage, OOP implementation, comprehensive documentation, error handling, and testable logic. The development process followed professional standards with version control, testing, and continuous integration.
-
-However, the evaluation reveals significant opportunities for enhancement. The most critical improvements would be implementing proper authentication, migrating to database storage, and adding question randomization. These changes would transform the MVP into a production-ready system suitable for enterprise deployment.
-
-The project demonstrated that even a relatively simple application requires careful attention to architecture, testing, documentation, and user experience. The lessons learned about incremental development, testing discipline, and tool selection will be valuable in future projects. Most importantly, the project shows how technology can address real business needs—in this case, improving security awareness across an organization through engaging, measurable training.
+Overall, I am really happy with this turned out. I feel like I have really developed my technical skills by separating logic and also deploying my application on streamlit. I would have loved to add more but due to my already learning of streamlit (especially the sessions) nI didn't have time to produce these changes to also learn more about database handling in python. Thank you for reading!
 
 ## Documentation
 - [Streamlit Documentation](https://docs.streamlit.io/) - Streamlit Official Docs
